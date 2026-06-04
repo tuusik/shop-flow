@@ -1,12 +1,13 @@
-from fastapi import FastAPI
-from routes.routers import router
-from database import Base, engine
 from dotenv import load_dotenv
+load_dotenv()
 
-if __name__ == "__main__":
-    load_dotenv()
-    Base.metadata.create_all(engine)
-    app = FastAPI()
+from fastapi import FastAPI
+from routes.users import user_router
+from routes.products import product_router
 
-    app.include_router(router)
+app = FastAPI()
+app.include_router(user_router)
+app.include_router(product_router)
+
+
 
