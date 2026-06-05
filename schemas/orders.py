@@ -1,14 +1,28 @@
 from datetime import date
 from schemas.base import BaseSchema
 from uuid import UUID
+from typing import List
 
-class SOrder(BaseSchema):
+
+class SOrderItemBase(BaseSchema):
+    product_id: UUID
+    quantity: int
+
+
+class SOrderItem(SOrderItemBase):
     id: UUID
-    user_id: int
+    order_id: UUID
+
+
+class SOrderBase(BaseSchema):
+    user_id: UUID
     created_at: date
 
-class SOrderItem(BaseSchema):
+
+class SOrderCreate(SOrderBase):
+    items: List[SOrderItemBase]
+
+
+class SOrder(SOrderBase):
     id: UUID
-    order_id: int
-    product_id: int
-    quantity: int
+    items: List[SOrderItem] | None = None
