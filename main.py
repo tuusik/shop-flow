@@ -10,4 +10,3 @@ app.include_router(user_router)
 app.include_router(product_router)
 
 
-

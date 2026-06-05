@@ -1,7 +1,7 @@
-from pydantic import BaseModel
 from datetime import date
+from schemas.base import BaseSchema
 
-class SProduct(BaseModel):
+class SProduct(BaseSchema):
     id: int
     title: str
     description: str
