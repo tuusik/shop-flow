@@ -7,6 +7,7 @@ from main import app
 from models import Base
 from database import engine
 from schemas.users import SUser
+from uuid import UUID
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -35,24 +36,24 @@ def client():
 
 @pytest.fixture
 def user():
-    return SUser(id=1, email="johndoe@gmail.com", created_at="2018-11-21")
+    return SUser(id=UUID("12345678-1234-5678-1234-567812345678"), email="johndoe@gmail.com", created_at="2018-11-21")
 
 
 @pytest.fixture
 def user_data():
-    return {"id": 1, "email": "johndoe@gmail.com", "created_at": "2018-11-21"}
+    return {"email": "johndoe@gmail.com", "created_at": "2018-11-21"}
 
 
 @pytest.fixture
 def created_user(client, user_data):
-    client.post("/users", json=user_data)
-    return user_data
+    response = client.post("/users", json=user_data)
+    assert response.status_code == 201
+    return response.json()
 
 
 @pytest.fixture
 def product_data():
     return {
-        "id": 1,
         "title": "Test Product",
         "description": "A product for testing",
         "price": 19.99,
@@ -63,5 +64,6 @@ def product_data():
 
 @pytest.fixture
 def created_product(client, product_data):
-    client.post("/products", json=product_data)
-    return product_data
+    response = client.post("/products", json=product_data)
+    assert response.status_code == 201
+    return response.json()

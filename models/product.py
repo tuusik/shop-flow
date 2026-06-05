@@ -2,10 +2,11 @@ import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Date
 from models.base import Base
+from uuid import UUID
 
 class Product(Base):
     __tablename__ = "products"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True)
     title: Mapped[str]
     description: Mapped[str]
     price: Mapped[float]

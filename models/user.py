@@ -2,10 +2,11 @@ import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Date
 from models.base import Base
+from uuid import UUID
 
 class User(Base):
     __tablename__ = "users"
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True)
     email: Mapped[str]
     created_at: Mapped[datetime.date] = mapped_column(Date)
 
