@@ -1,0 +1,39 @@
+from repositories.users import UserRepository
+from sqlalchemy.orm import Session
+from uuid import UUID
+from typing import List
+from schemas.users import SUser, SUserPatch, SUserBase
+
+
+class UserService:
+    def __init__(self, session: Session):
+        self.repo = UserRepository(session)
+
+    def get_users_list(self) -> List[SUser]:
+        return [SUser.model_validate(user) for user in self.repo.get_users_list()]
+
+    def get_user(self, id: UUID) -> SUser | None:
+        user = self.repo.get(id)
+        if not user:
+            return None
+        return SUser.model_validate(user)
+
+    def delete_user(self, id: UUID) -> bool:
+        return self.repo.delete(id)
+
+    def create_user(self, user: SUserBase) -> SUser:
+        if self.repo.get_by_email(user.email):
+            raise ValueError("User with current email already exists")
+        return SUser.model_validate(self.repo.create(user))
+
+    def update_user(self, id: UUID, data: SUserBase) -> SUser | None:
+        user = self.repo.update(id, data.model_dump())
+        if not user:
+            return None
+        return SUser.model_validate(user)
+
+    def patch_user(self, id: UUID, data: SUserPatch) -> SUser | None:
+        user = self.repo.update(id, data.model_dump(exclude_none=True))
+        if not user:
+            return None
+        return SUser.model_validate(user)

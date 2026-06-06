@@ -67,3 +67,26 @@ def created_product(client, product_data):
     response = client.post("/products", json=product_data)
     assert response.status_code == 201
     return response.json()
+
+
+@pytest.fixture
+def created_user_and_product(client, user_data, product_data):
+    user = client.post("/users", json=user_data).json()
+    product = client.post("/products", json=product_data).json()
+    return {"user": user, "product": product}
+
+
+@pytest.fixture
+def order_data(created_user_and_product):
+    return {
+        "user_id": created_user_and_product["user"]["id"],
+        "created_at": "2024-02-01",
+        "items": [{"product_id": created_user_and_product["product"]["id"], "quantity": 2}],
+    }
+
+
+@pytest.fixture
+def created_order(client, order_data):
+    response = client.post("/orders", json=order_data)
+    assert response.status_code == 201
+    return response.json()
