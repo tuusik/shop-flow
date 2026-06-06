@@ -1,65 +1,61 @@
-from uuid import UUID, uuid4
-from fastapi import HTTPException
-from fastapi import APIRouter
-from fastapi import status
+from uuid import UUID
+from fastapi import HTTPException, APIRouter, status
 from typing import List
-from models import Product
+from repositories.products import ProductRepository
 from database import session_factory
 from schemas.products import SProduct, SProductBase, SProductPatch
 
 product_router = APIRouter(prefix="/products")
 
+
 @product_router.get("", status_code=status.HTTP_200_OK)
 def get_products() -> List[SProduct]:
     with session_factory() as session:
-        obj = session.query(Product).all()
-        return obj
+        repo = ProductRepository(session)
+        return [SProduct.model_validate(p) for p in repo.get_products_list()]
+
 
 @product_router.get("/{id}", status_code=status.HTTP_200_OK)
 def get_product(id: UUID) -> SProduct:
     with session_factory() as session:
-        obj = session.get(Product, id)
-        if not obj:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product with current id is not found")
-        return obj
+        repo = ProductRepository(session)
+        product = repo.get(id)
+        if not product:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        return SProduct.model_validate(product)
+
 
 @product_router.post("", status_code=status.HTTP_201_CREATED)
 def create_product(product: SProductBase):
     with session_factory() as session:
-        new_product = Product(**product.model_dump())
-        new_product.id = uuid4()
-        session.add(new_product)
-        session.commit()
-        session.refresh(new_product)
-        return new_product
+        repo = ProductRepository(session)
+        new_product = repo.create(product)
+        return SProduct.model_validate(new_product)
+
 
 @product_router.put("/{id}", status_code=status.HTTP_200_OK)
-def update_product(id: UUID, product: SProductBase):
+def update_product(id: UUID, product: SProductBase) -> SProduct:
     with session_factory() as session:
-        obj = session.get(Product, id)
-        if not obj:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product with current id is not found")
-        for field, value in product.model_dump().items():
-            setattr(obj, field, value)
-        session.commit()
-        return obj
+        repo = ProductRepository(session)
+        updated = repo.update(id, product.model_dump())
+        if not updated:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        return SProduct.model_validate(updated)
+
 
 @product_router.patch("/{id}", status_code=status.HTTP_200_OK)
-def patch_product(id: UUID, product: SProductPatch):
+def patch_product(id: UUID, product: SProductPatch) -> SProduct:
     with session_factory() as session:
-        obj = session.get(Product, id)
-        if not obj:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product with current id is not found")
-        for field, value in product.model_dump(exclude_none=True).items():
-            setattr(obj, field, value)
-        session.commit()
-        return obj
+        repo = ProductRepository(session)
+        updated = repo.update(id, product.model_dump(exclude_none=True))
+        if not updated:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        return SProduct.model_validate(updated)
+
 
 @product_router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_product(id: UUID):
     with session_factory() as session:
-        obj = session.get(Product, id)
-        if not obj:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product with current id is not found")
-        session.delete(obj)
-        session.commit()
+        repo = ProductRepository(session)
+        if not repo.delete(id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
