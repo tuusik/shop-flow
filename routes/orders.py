@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import HTTPException, APIRouter, Depends, status
 from typing import List
-from schemas.orders import SOrder, SOrderCreate
+from schemas.orders import SOrder, SOrderCreate, SOrderItem
 from services.orders import OrderService
 from dependencies import get_order_service
 
@@ -33,3 +33,11 @@ def create_order(order: SOrderCreate, service: OrderService = Depends(get_order_
 def delete_order(id: UUID, service: OrderService = Depends(get_order_service)):
     if not service.delete_order(id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+@order_router.get("/{id}/products", status_code=status.HTTP_200_OK)
+def get_products_in_order(id: UUID, service: OrderService = Depends(get_order_service)) -> List[SOrderItem] | None:
+    items = service.get_products_in_order(id)
+    if not items:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    return items
+

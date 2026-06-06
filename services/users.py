@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
 from schemas.users import SUser, SUserPatch, SUserBase
-
+from schemas.orders import SOrder
 
 class UserService:
     def __init__(self, session: Session):
@@ -37,3 +37,10 @@ class UserService:
         if not user:
             return None
         return SUser.model_validate(user)
+
+    def get_user_orders(self, id: UUID) -> List[SOrder] | None:
+        orders = self.repo.get_user_orders(id)
+        if orders is None:
+            return None
+        return [SOrder.model_validate(o) for o in orders]
+

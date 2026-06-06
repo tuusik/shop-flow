@@ -1,7 +1,8 @@
 from models.product import Product
+from models.order import OrderItem
 from uuid import UUID, uuid4
 from schemas.products import SProductBase
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -40,3 +41,12 @@ class ProductRepository:
         self.session.delete(product)
         self.session.commit()
         return True
+
+    def get_popular_products(self, limit: int) -> List[Product]:
+        return list(self.session.scalars(
+            select(Product)
+            .join(Product.items)
+            .group_by(Product.id)
+            .order_by(func.sum(OrderItem.quantity).desc())
+            .limit(limit)
+        ))

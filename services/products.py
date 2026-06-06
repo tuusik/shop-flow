@@ -41,3 +41,6 @@ class ProductService:
 
     def delete_product(self, id: UUID) -> bool:
         return self.repo.delete(id)
+
+    def get_popular_products(self, limit: int) -> List[SProduct]:
+        return [SProduct.model_validate(p) for p in self.repo.get_popular_products(limit)]

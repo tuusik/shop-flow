@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import HTTPException, APIRouter, Depends, status
+from fastapi import HTTPException, APIRouter, Depends, status, Query
 from typing import List
 from schemas.products import SProduct, SProductBase, SProductPatch
 from services.products import ProductService
@@ -11,6 +11,14 @@ product_router = APIRouter(prefix="/products")
 @product_router.get("", status_code=status.HTTP_200_OK)
 def get_products(service: ProductService = Depends(get_product_service)) -> List[SProduct]:
     return service.get_products_list()
+
+
+@product_router.get("/popular", status_code=status.HTTP_200_OK)
+def get_popular_products(
+    limit: int = Query(5, ge=1, le=100),
+    service: ProductService = Depends(get_product_service),
+) -> List[SProduct]:
+    return service.get_popular_products(limit)
 
 
 @product_router.get("/{id}", status_code=status.HTTP_200_OK)

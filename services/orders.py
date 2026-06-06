@@ -4,7 +4,7 @@ from typing import List
 from models.user import User
 from models.product import Product
 from repositories.orders import OrderRepository
-from schemas.orders import SOrder, SOrderCreate
+from schemas.orders import SOrder, SOrderCreate, SOrderItem
 
 
 class OrderService:
@@ -53,3 +53,9 @@ class OrderService:
                 product.stock += item.quantity
 
         return self.repo.delete(id)
+
+    def get_products_in_order(self, id: UUID) -> List[SOrderItem] | None:
+        items = self.repo.get_products_in_order(id)
+        if not items:
+            return None
+        return [SOrderItem.model_validate(i) for i in items]

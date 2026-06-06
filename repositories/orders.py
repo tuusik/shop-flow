@@ -34,3 +34,9 @@ class OrderRepository:
         self.session.delete(order)
         self.session.commit()
         return True
+
+    def get_products_in_order(self, id: UUID) -> List[OrderItem] | None:
+        order = self.get(id)
+        if not order:
+            return None
+        return list(self.session.scalars(select(OrderItem).where(OrderItem.order_id == id)))

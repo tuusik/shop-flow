@@ -4,12 +4,13 @@ from uuid import UUID
 from schemas.users import SUser, SUserPatch, SUserBase
 from services.users import UserService
 from dependencies import get_user_service
+from schemas.orders import SOrder
 
 user_router = APIRouter(prefix="/users")
 
 
 @user_router.post("", status_code=status.HTTP_201_CREATED)
-def create_user(user: SUserBase, service: UserService = Depends(get_user_service)):
+def create_user(user: SUserBase, service: UserService = Depends(get_user_service)) -> SUser:
     try:
         return service.create_user(user)
     except ValueError as e:
@@ -49,3 +50,10 @@ def patch_user(id: UUID, user: SUserPatch, service: UserService = Depends(get_us
 def delete_user(id: UUID, service: UserService = Depends(get_user_service)):
     if not service.delete_user(id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+@user_router.get("/{id}/orders", status_code=status.HTTP_200_OK)
+def get_user_orders(id: UUID, service: UserService = Depends(get_user_service)) -> List[SOrder]:
+    orders = service.get_user_orders(id)
+    if orders is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return orders
