@@ -1,13 +1,13 @@
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from database import session_factory
+from database import SessionLocal
 from services.users import UserService
 from services.products import ProductService
 from services.orders import OrderService
 
 
 def get_session():
-    with session_factory() as session:
+    with SessionLocal() as session:
         yield session
 
 

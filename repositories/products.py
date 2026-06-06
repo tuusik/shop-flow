@@ -1,22 +1,21 @@
-from models.product import Product
-from models.order import OrderItem
 from uuid import UUID, uuid4
-from schemas.products import SProductBase
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from typing import List
+from models.product import Product
+from models.order import OrderItem
+from schemas.products import SProductBase
+from repositories.base import BaseRepository
 
-class ProductRepository:
+
+class ProductRepository(BaseRepository[Product]):
     def __init__(self, session: Session):
-        self.session = session
-
-    def get(self, id: UUID) -> Product | None:
-        return self.session.get(Product, id)
+        super().__init__(session, Product)
 
     def get_products_list(self) -> List[Product]:
-        return list(self.session.scalars(select(Product)))
+        return self.get_list()
 
-    def create(self, product: SProductBase):
+    def create(self, product: SProductBase) -> Product:
         new_product = Product(**product.model_dump())
         new_product.id = uuid4()
         self.session.add(new_product)
@@ -33,14 +32,6 @@ class ProductRepository:
         self.session.commit()
         self.session.refresh(product)
         return product
-
-    def delete(self, id: UUID) -> bool:
-        product = self.get(id)
-        if not product:
-            return False
-        self.session.delete(product)
-        self.session.commit()
-        return True
 
     def get_popular_products(self, limit: int) -> List[Product]:
         return list(self.session.scalars(

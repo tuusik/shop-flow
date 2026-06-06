@@ -12,3 +12,8 @@ app.include_router(product_router)
 app.include_router(order_router)
 
 
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
+

@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from uuid import UUID
 from typing import List
-from models.user import User
-from models.product import Product
 from repositories.orders import OrderRepository
+from repositories.users import UserRepository
+from repositories.products import ProductRepository
 from schemas.orders import SOrder, SOrderCreate, SOrderItem
 
 
@@ -11,6 +11,8 @@ class OrderService:
     def __init__(self, session: Session):
         self.session = session
         self.repo = OrderRepository(session)
+        self.user_repo = UserRepository(session)
+        self.product_repo = ProductRepository(session)
 
     def get_orders_list(self) -> List[SOrder]:
         return [SOrder.model_validate(o) for o in self.repo.get_orders_list()]
@@ -22,12 +24,12 @@ class OrderService:
         return SOrder.model_validate(order)
 
     def create_order(self, data: SOrderCreate) -> SOrder:
-        user = self.session.get(User, data.user_id)
+        user = self.user_repo.get(data.user_id)
         if not user:
             raise ValueError(f"User {data.user_id} not found")
 
         for item in data.items:
-            product = self.session.get(Product, item.product_id)
+            product = self.product_repo.get(item.product_id)
             if not product:
                 raise ValueError(f"Product {item.product_id} not found")
             if product.stock < item.quantity:
@@ -37,7 +39,7 @@ class OrderService:
                 )
 
         for item in data.items:
-            product = self.session.get(Product, item.product_id)
+            product = self.product_repo.get(item.product_id)
             product.stock -= item.quantity
 
         return SOrder.model_validate(self.repo.create(data))
@@ -48,7 +50,7 @@ class OrderService:
             return False
 
         for item in order.items:
-            product = self.session.get(Product, item.product_id)
+            product = self.product_repo.get(item.product_id)
             if product:
                 product.stock += item.quantity
 

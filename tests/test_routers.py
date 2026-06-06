@@ -1,6 +1,3 @@
-import pytest
-
-
 class TestUsers:
     def test_create_user(self, client, user_data):
         response = client.post("/users", json=user_data)

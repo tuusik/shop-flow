@@ -22,7 +22,7 @@ def get_order(id: UUID, service: OrderService = Depends(get_order_service)) -> S
 
 
 @order_router.post("", status_code=status.HTTP_201_CREATED)
-def create_order(order: SOrderCreate, service: OrderService = Depends(get_order_service)):
+def create_order(order: SOrderCreate, service: OrderService = Depends(get_order_service)) -> SOrder:
     try:
         return service.create_order(order)
     except ValueError as e:
@@ -30,12 +30,13 @@ def create_order(order: SOrderCreate, service: OrderService = Depends(get_order_
 
 
 @order_router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_order(id: UUID, service: OrderService = Depends(get_order_service)):
+def delete_order(id: UUID, service: OrderService = Depends(get_order_service)) -> None:
     if not service.delete_order(id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
+
 @order_router.get("/{id}/products", status_code=status.HTTP_200_OK)
-def get_products_in_order(id: UUID, service: OrderService = Depends(get_order_service)) -> List[SOrderItem] | None:
+def get_products_in_order(id: UUID, service: OrderService = Depends(get_order_service)) -> List[SOrderItem]:
     items = service.get_products_in_order(id)
     if not items:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")

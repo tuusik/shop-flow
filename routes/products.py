@@ -30,7 +30,7 @@ def get_product(id: UUID, service: ProductService = Depends(get_product_service)
 
 
 @product_router.post("", status_code=status.HTTP_201_CREATED)
-def create_product(product: SProductBase, service: ProductService = Depends(get_product_service)):
+def create_product(product: SProductBase, service: ProductService = Depends(get_product_service)) -> SProduct:
     try:
         return service.create_product(product)
     except ValueError as e:
@@ -60,6 +60,6 @@ def patch_product(id: UUID, product: SProductPatch, service: ProductService = De
 
 
 @product_router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(id: UUID, service: ProductService = Depends(get_product_service)):
+def delete_product(id: UUID, service: ProductService = Depends(get_product_service)) -> None:
     if not service.delete_product(id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")

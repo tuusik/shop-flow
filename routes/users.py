@@ -18,7 +18,7 @@ def create_user(user: SUserBase, service: UserService = Depends(get_user_service
 
 
 @user_router.get("", status_code=status.HTTP_200_OK)
-def get_users_list(service: UserService = Depends(get_user_service)) -> List[SUser]:
+def get_users(service: UserService = Depends(get_user_service)) -> List[SUser]:
     return service.get_users_list()
 
 
@@ -47,7 +47,7 @@ def patch_user(id: UUID, user: SUserPatch, service: UserService = Depends(get_us
 
 
 @user_router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(id: UUID, service: UserService = Depends(get_user_service)):
+def delete_user(id: UUID, service: UserService = Depends(get_user_service)) -> None:
     if not service.delete_user(id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 

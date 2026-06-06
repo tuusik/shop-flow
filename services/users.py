@@ -27,12 +27,19 @@ class UserService:
         return SUser.model_validate(self.repo.create(user))
 
     def update_user(self, id: UUID, data: SUserBase) -> SUser | None:
+        existing = self.repo.get_by_email(data.email)
+        if existing and existing.id != id:
+            raise ValueError("User with current email already exists")
         user = self.repo.update(id, data.model_dump())
         if not user:
             return None
         return SUser.model_validate(user)
 
     def patch_user(self, id: UUID, data: SUserPatch) -> SUser | None:
+        if data.email is not None:
+            existing = self.repo.get_by_email(data.email)
+            if existing and existing.id != id:
+                raise ValueError("User with current email already exists")
         user = self.repo.update(id, data.model_dump(exclude_none=True))
         if not user:
             return None

@@ -1,21 +1,20 @@
-from models.order import Order, OrderItem
 from uuid import UUID, uuid4
-from schemas.orders import SOrderCreate
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from typing import List
+from models.order import Order, OrderItem
+from schemas.orders import SOrderCreate
+from repositories.base import BaseRepository
 
-class OrderRepository:
+
+class OrderRepository(BaseRepository[Order]):
     def __init__(self, session: Session):
-        self.session = session
-
-    def get(self, id: UUID) -> Order | None:
-        return self.session.get(Order, id)
+        super().__init__(session, Order)
 
     def get_orders_list(self) -> List[Order]:
-        return list(self.session.scalars(select(Order)))
+        return self.get_list()
 
-    def create(self, order: SOrderCreate):
+    def create(self, order: SOrderCreate) -> Order:
         new_order = Order(user_id=order.user_id, created_at=order.created_at)
         new_order.id = uuid4()
         for item in order.items:
@@ -26,14 +25,6 @@ class OrderRepository:
         self.session.commit()
         self.session.refresh(new_order)
         return new_order
-
-    def delete(self, id: UUID) -> bool:
-        order = self.get(id)
-        if not order:
-            return False
-        self.session.delete(order)
-        self.session.commit()
-        return True
 
     def get_products_in_order(self, id: UUID) -> List[OrderItem] | None:
         order = self.get(id)
