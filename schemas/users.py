@@ -1,7 +1,10 @@
-from pydantic import EmailStr
 from datetime import date
-from schemas.base import BaseSchema
 from uuid import UUID
+
+from pydantic import EmailStr
+
+from schemas.base import BaseSchema
+
 
 class SUserBase(BaseSchema):
     email: EmailStr
@@ -11,5 +14,5 @@ class SUser(SUserBase):
     id: UUID
 
 class SUserPatch(SUserBase):
-    email: EmailStr | None = None
-    created_at: date | None = None
+    email: EmailStr | None = None  # type: ignore[assignment]
+    created_at: date | None = None  # type: ignore[assignment]

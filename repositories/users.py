@@ -1,11 +1,13 @@
+from typing import Any, List
 from uuid import UUID, uuid4
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
-from typing import List
-from models.user import User
+
 from models.order import Order
-from schemas.users import SUserBase
+from models.user import User
 from repositories.base import BaseRepository
+from schemas.users import SUserBase
 
 
 class UserRepository(BaseRepository[User]):
@@ -26,7 +28,7 @@ class UserRepository(BaseRepository[User]):
         self.session.refresh(new_user)
         return new_user
 
-    def update(self, id: UUID, data: dict) -> User | None:
+    def update(self, id: UUID, data: dict[str, Any]) -> User | None:
         user = self.get(id)
         if not user:
             return None

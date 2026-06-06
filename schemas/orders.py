@@ -1,7 +1,8 @@
 from datetime import date
-from schemas.base import BaseSchema
-from uuid import UUID
 from typing import List
+from uuid import UUID
+
+from schemas.base import BaseSchema
 
 
 class SOrderItemBase(BaseSchema):

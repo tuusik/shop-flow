@@ -1,6 +1,8 @@
 from datetime import date
-from schemas.base import BaseSchema
 from uuid import UUID
+
+from schemas.base import BaseSchema
+
 
 class SProductBase(BaseSchema):
     title: str
@@ -13,8 +15,8 @@ class SProduct(SProductBase):
     id: UUID
 
 class SProductPatch(SProductBase):
-    title: str | None = None
-    description: str | None = None
-    price: float | None = None
-    stock: int | None = None
-    created_at: date | None = None
+    title: str | None = None  # type: ignore[assignment]
+    description: str | None = None  # type: ignore[assignment]
+    price: float | None = None  # type: ignore[assignment]
+    stock: int | None = None  # type: ignore[assignment]
+    created_at: date | None = None  # type: ignore[assignment]

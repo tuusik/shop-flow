@@ -1,12 +1,15 @@
+from typing import Generator
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
+
 from database import SessionLocal
-from services.users import UserService
-from services.products import ProductService
 from services.orders import OrderService
+from services.products import ProductService
+from services.users import UserService
 
 
-def get_session():
+def get_session() -> Generator[Session, None, None]:
     with SessionLocal() as session:
         yield session
 

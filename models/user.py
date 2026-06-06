@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import datetime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Date
-from models.base import Base
 from uuid import UUID
+
+from sqlalchemy import Date
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.base import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -10,4 +15,4 @@ class User(Base):
     email: Mapped[str]
     created_at: Mapped[datetime.date] = mapped_column(Date)
 
-    orders: Mapped[list["Order"]] = relationship("Order", back_populates="user", cascade="all, delete-orphan")
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="user", cascade="all, delete-orphan")  # type: ignore[name-defined]

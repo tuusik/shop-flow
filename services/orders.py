@@ -1,9 +1,11 @@
-from sqlalchemy.orm import Session
-from uuid import UUID
 from typing import List
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
 from repositories.orders import OrderRepository
-from repositories.users import UserRepository
 from repositories.products import ProductRepository
+from repositories.users import UserRepository
 from schemas.orders import SOrder, SOrderCreate, SOrderItem
 
 
@@ -40,6 +42,12 @@ class OrderService:
 
         for item in data.items:
             product = self.product_repo.get(item.product_id)
+            if not product:
+                raise ValueError(f"Product {item.product_id} not found")
+
+        for item in data.items:
+            product = self.product_repo.get(item.product_id)
+            assert product is not None
             product.stock -= item.quantity
 
         return SOrder.model_validate(self.repo.create(data))

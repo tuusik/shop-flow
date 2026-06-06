@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import datetime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Date
-from models.base import Base
 from uuid import UUID
+
+from sqlalchemy import Date
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.base import Base
+
 
 class Product(Base):
     __tablename__ = "products"
@@ -13,4 +18,4 @@ class Product(Base):
     stock: Mapped[int]
     created_at: Mapped[datetime.date] = mapped_column(Date)
 
-    items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="product")
+    items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="product")  # type: ignore[name-defined]
