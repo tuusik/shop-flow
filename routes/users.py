@@ -1,62 +1,51 @@
 from typing import List
-from fastapi import APIRouter
-from repositories.users import UserRepository
-from database import session_factory
-from schemas.users import SUser, SUserPatch, SUserBase
-from fastapi import status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException
 from uuid import UUID
+from schemas.users import SUser, SUserPatch, SUserBase
+from services.users import UserService
+from dependencies import get_user_service
 
 user_router = APIRouter(prefix="/users")
 
 
 @user_router.post("", status_code=status.HTTP_201_CREATED)
-def create_user(user: SUserBase):
-    with session_factory() as session:
-        repo = UserRepository(session)
-        new_user = repo.create(user)
-        return SUser.model_validate(new_user)
+def create_user(user: SUserBase, service: UserService = Depends(get_user_service)):
+    try:
+        return service.create_user(user)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @user_router.get("", status_code=status.HTTP_200_OK)
-def get_users_list() -> List[SUser]:
-    with session_factory() as session:
-        repo = UserRepository(session)
-        return [SUser.model_validate(u) for u in repo.get_users_list()]
+def get_users_list(service: UserService = Depends(get_user_service)) -> List[SUser]:
+    return service.get_users_list()
 
 
 @user_router.get("/{id}", status_code=status.HTTP_200_OK)
-def get_user(id: UUID) -> SUser:
-    with session_factory() as session:
-        repo = UserRepository(session)
-        user = repo.get(id)
-        if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        return SUser.model_validate(user)
+def get_user(id: UUID, service: UserService = Depends(get_user_service)) -> SUser:
+    user = service.get_user(id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
 
 
 @user_router.put("/{id}", status_code=status.HTTP_200_OK)
-def update_user(id: UUID, user: SUserBase) -> SUser:
-    with session_factory() as session:
-        repo = UserRepository(session)
-        updated = repo.update(id, user.model_dump())
-        if not updated:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        return SUser.model_validate(updated)
+def update_user(id: UUID, user: SUserBase, service: UserService = Depends(get_user_service)) -> SUser:
+    updated = service.update_user(id, user)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return updated
 
 
 @user_router.patch("/{id}", status_code=status.HTTP_200_OK)
-def patch_user(id: UUID, user: SUserPatch) -> SUser:
-    with session_factory() as session:
-        repo = UserRepository(session)
-        updated = repo.update(id, user.model_dump(exclude_none=True))
-        if not updated:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        return SUser.model_validate(updated)
+def patch_user(id: UUID, user: SUserPatch, service: UserService = Depends(get_user_service)) -> SUser:
+    updated = service.patch_user(id, user)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return updated
 
 
 @user_router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(id: UUID):
-    with session_factory() as session:
-        repo = UserRepository(session)
-        if not repo.delete(id):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+def delete_user(id: UUID, service: UserService = Depends(get_user_service)):
+    if not service.delete_user(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

@@ -5,9 +5,10 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from models import Base
-from database import engine
+from database import engine, session_factory
 from schemas.users import SUser
 from uuid import UUID
+from dependencies import get_session
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -29,7 +30,17 @@ def clean_db():
 
 
 @pytest.fixture
-def client():
+def override_session():
+    def _get_test_session():
+        with session_factory() as session:
+            yield session
+    app.dependency_overrides[get_session] = _get_test_session
+    yield
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def client(override_session):
     with TestClient(app) as c:
         yield c
 
