@@ -88,23 +88,30 @@ async def created_product(client, product_data):
 
 
 @pytest_asyncio.fixture
-async def created_user_and_product(client, user_data, product_data):
-    user = (await client.post("/users", json=user_data)).json()
+async def auth_headers(client, user_data):
+    response = await client.post("/auth/register", json=user_data)
+    assert response.status_code == 201
+    login_response = await client.post("/auth/login", json=user_data)
+    token = login_response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def created_user_and_product(client, product_data, auth_headers):
     product = (await client.post("/products", json=product_data)).json()
-    return {"user": user, "product": product}
+    return {"product": product, "auth": auth_headers}
 
 
 @pytest_asyncio.fixture
 async def order_data(created_user_and_product):
     return {
-        "user_id": created_user_and_product["user"]["id"],
         "created_at": "2024-02-01",
         "items": [{"product_id": created_user_and_product["product"]["id"], "quantity": 2}],
     }
 
 
 @pytest_asyncio.fixture
-async def created_order(client, order_data):
-    response = await client.post("/orders", json=order_data)
+async def created_order(client, order_data, auth_headers):
+    response = await client.post("/orders", json=order_data, headers=auth_headers)
     assert response.status_code == 201
     return response.json()

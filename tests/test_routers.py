@@ -122,23 +122,21 @@ class TestProducts:
 
 @pytest.mark.asyncio
 class TestOrders:
-    async def test_create_order(self, client, order_data):
-        response = await client.post("/orders", json=order_data)
+    async def test_create_order(self, client, order_data, auth_headers):
+        response = await client.post("/orders", json=order_data, headers=auth_headers)
         assert response.status_code == 201
         assert "id" in response.json()
 
-    async def test_create_order_nonexistent_user(self, client, order_data):
-        data = {**order_data, "user_id": "00000000-0000-0000-0000-000000000000"}
-        response = await client.post("/orders", json=data)
-        assert response.status_code == 400
+    async def test_create_order_unauthorized(self, client, order_data):
+        response = await client.post("/orders", json=order_data)
+        assert response.status_code == 401
 
-    async def test_create_order_insufficient_stock(self, client, created_user_and_product):
+    async def test_create_order_insufficient_stock(self, client, created_user_and_product, auth_headers):
         data = {
-            "user_id": created_user_and_product["user"]["id"],
             "created_at": "2024-02-01",
             "items": [{"product_id": created_user_and_product["product"]["id"], "quantity": 999}],
         }
-        response = await client.post("/orders", json=data)
+        response = await client.post("/orders", json=data, headers=auth_headers)
         assert response.status_code == 400
 
     async def test_get_orders_list(self, client, created_order):
@@ -157,17 +155,17 @@ class TestOrders:
         response = await client.get("/orders/00000000-0000-0000-0000-000000000000")
         assert response.status_code == 404
 
-    async def test_delete_order(self, client, created_order):
-        response = await client.delete(f"/orders/{created_order['id']}")
+    async def test_delete_order(self, client, created_order, auth_headers):
+        response = await client.delete(f"/orders/{created_order['id']}", headers=auth_headers)
         assert response.status_code == 204
 
-    async def test_delete_nonexistent_order(self, client):
-        response = await client.delete("/orders/00000000-0000-0000-0000-000000000000")
+    async def test_delete_nonexistent_order(self, client, auth_headers):
+        response = await client.delete("/orders/00000000-0000-0000-0000-000000000000", headers=auth_headers)
         assert response.status_code == 404
 
-    async def test_order_stock_restored_on_delete(self, client, created_user_and_product, order_data):
-        response = await client.post("/orders", json=order_data)
+    async def test_order_stock_restored_on_delete(self, client, created_user_and_product, order_data, auth_headers):
+        response = await client.post("/orders", json=order_data, headers=auth_headers)
         order = response.json()
-        await client.delete(f"/orders/{order['id']}")
+        await client.delete(f"/orders/{order['id']}", headers=auth_headers)
         product_response = await client.get(f"/products/{created_user_and_product['product']['id']}")
         assert product_response.json()["stock"] == created_user_and_product["product"]["stock"]

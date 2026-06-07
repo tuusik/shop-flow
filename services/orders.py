@@ -25,10 +25,10 @@ class OrderService:
             return None
         return SOrder.model_validate(order)
 
-    async def create_order(self, data: SOrderCreate) -> SOrder:
-        user = await self.user_repo.get(data.user_id)
+    async def create_order(self, data: SOrderCreate, user_id: UUID) -> SOrder:
+        user = await self.user_repo.get(user_id)
         if not user:
-            raise ValueError(f"User {data.user_id} not found")
+            raise ValueError(f"User {user_id} not found")
 
         for item in data.items:
             product = await self.product_repo.get(item.product_id)
@@ -45,7 +45,7 @@ class OrderService:
             assert product is not None
             product.stock -= item.quantity
 
-        return SOrder.model_validate(await self.repo.create(data))
+        return SOrder.model_validate(await self.repo.create(data, user_id))
 
     async def delete_order(self, id: UUID) -> bool:
         order = await self.repo.get(id)

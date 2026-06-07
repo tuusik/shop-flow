@@ -20,7 +20,8 @@ class SOrderBase(BaseSchema):
     created_at: date
 
 
-class SOrderCreate(SOrderBase):
+class SOrderCreate(BaseSchema):
+    created_at: date
     items: List[SOrderItemBase]
 
 

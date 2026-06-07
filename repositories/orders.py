@@ -16,8 +16,8 @@ class OrderRepository(BaseRepository[Order]):
     async def get_orders_list(self) -> List[Order]:
         return await self.get_list()
 
-    async def create(self, order: SOrderCreate) -> Order:
-        new_order = Order(user_id=order.user_id, created_at=order.created_at)
+    async def create(self, order: SOrderCreate, user_id: UUID) -> Order:
+        new_order = Order(user_id=user_id, created_at=order.created_at)
         new_order.id = uuid4()
         for item in order.items:
             order_item = OrderItem(product_id=item.product_id, quantity=item.quantity)
