@@ -8,7 +8,6 @@ from sqlalchemy.orm import selectinload
 from models.order import Order
 from models.user import User
 from repositories.base import BaseRepository
-from schemas.users import SUserBase
 
 
 class UserRepository(BaseRepository[User]):
@@ -22,8 +21,8 @@ class UserRepository(BaseRepository[User]):
         result = await self.session.scalars(select(User).where(User.email == email))
         return result.first()
 
-    async def create(self, user: SUserBase) -> User:
-        new_user = User(**user.model_dump())
+    async def create(self, data: dict[str, Any]) -> User:
+        new_user = User(**data)
         new_user.id = uuid4()
         self.session.add(new_user)
         await self.session.commit()

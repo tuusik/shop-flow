@@ -58,12 +58,12 @@ def user():
 
 @pytest.fixture
 def user_data():
-    return {"email": "johndoe@gmail.com", "created_at": "2018-11-21"}
+    return {"email": "johndoe@gmail.com", "password": "secret123", "created_at": "2018-11-21"}
 
 
 @pytest_asyncio.fixture
 async def created_user(client, user_data):
-    response = await client.post("/users", json=user_data)
+    response = await client.post("/auth/register", json=user_data)
     assert response.status_code == 201
     return response.json()
 

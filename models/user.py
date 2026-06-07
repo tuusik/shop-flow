@@ -13,6 +13,7 @@ class User(Base):
     __tablename__ = "users"
     id: Mapped[UUID] = mapped_column(primary_key=True)
     email: Mapped[str]
+    hashed_password: Mapped[str]
     created_at: Mapped[datetime.date] = mapped_column(Date)
 
     orders: Mapped[list["Order"]] = relationship("Order", back_populates="user", cascade="all, delete-orphan")  # type: ignore[name-defined]

@@ -1,11 +1,14 @@
 from typing import List
 from uuid import UUID
 
+from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.users import UserRepository
 from schemas.orders import SOrder
-from schemas.users import SUser, SUserBase, SUserPatch
+from schemas.users import SUser, SUserBase, SUserPatch, SUserRegister
+
+pwd_context = CryptContext(schemes=["bcrypt"])
 
 
 class UserService:
@@ -27,7 +30,16 @@ class UserService:
     async def create_user(self, user: SUserBase) -> SUser:
         if await self.repo.get_by_email(user.email):
             raise ValueError("User with current email already exists")
-        return SUser.model_validate(await self.repo.create(user))
+        user_data = user.model_dump()
+        user_data["hashed_password"] = ""
+        return SUser.model_validate(await self.repo.create(user_data))
+
+    async def register(self, data: SUserRegister) -> SUser:
+        if await self.repo.get_by_email(data.email):
+            raise ValueError("User with this email already exists")
+        user_data = data.model_dump(exclude={"password"})
+        user_data["hashed_password"] = pwd_context.hash(data.password)
+        return SUser.model_validate(await self.repo.create(user_data))
 
     async def update_user(self, id: UUID, data: SUserBase) -> SUser | None:
         existing = await self.repo.get_by_email(data.email)
