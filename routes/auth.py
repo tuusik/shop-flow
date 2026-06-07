@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dependencies import get_auth_service, get_user_service
+from dependencies import get_auth_service, get_current_user, get_user_service
 from schemas.auth import SToken, SUserLogin
 from schemas.users import SUser, SUserRegister
 from services.auth import AuthService
@@ -23,3 +23,8 @@ async def login(data: SUserLogin, service: AuthService = Depends(get_auth_servic
         return await service.login(data)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+
+
+@auth_router.get("/me")
+async def me(user: SUser = Depends(get_current_user)) -> SUser:
+    return user
