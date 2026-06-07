@@ -1,9 +1,11 @@
-from uuid import UUID
-from fastapi import HTTPException, APIRouter, Depends, status, Query
 from typing import List
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from dependencies import get_product_service
 from schemas.products import SProduct, SProductBase, SProductPatch
 from services.products import ProductService
-from dependencies import get_product_service
 
 product_router = APIRouter(prefix="/products")
 

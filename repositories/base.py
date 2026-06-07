@@ -1,5 +1,6 @@
+from typing import Generic, List, TypeVar
 from uuid import UUID
-from typing import TypeVar, Generic, List
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 

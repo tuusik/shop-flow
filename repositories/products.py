@@ -1,11 +1,13 @@
+from typing import Any, List
 from uuid import UUID, uuid4
-from sqlalchemy import select, func
+
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from typing import List
-from models.product import Product
+
 from models.order import OrderItem
-from schemas.products import SProductBase
+from models.product import Product
 from repositories.base import BaseRepository
+from schemas.products import SProductBase
 
 
 class ProductRepository(BaseRepository[Product]):
@@ -23,7 +25,7 @@ class ProductRepository(BaseRepository[Product]):
         self.session.refresh(new_product)
         return new_product
 
-    def update(self, id: UUID, data: dict) -> Product | None:
+    def update(self, id: UUID, data: dict[str, Any]) -> Product | None:
         product = self.get(id)
         if not product:
             return None

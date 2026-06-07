@@ -1,10 +1,12 @@
+from typing import List
 from uuid import UUID, uuid4
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from typing import List
+
 from models.order import Order, OrderItem
-from schemas.orders import SOrderCreate
 from repositories.base import BaseRepository
+from schemas.orders import SOrderCreate
 
 
 class OrderRepository(BaseRepository[Order]):

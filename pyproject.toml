@@ -1,12 +1,14 @@
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+exclude = ["migrations/versions/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
 
 [tool.ruff.lint.per-file-ignores]
 "models/*.py" = ["F821"]
+"migrations/env.py" = ["E402", "I001"]
 
 [tool.mypy]
 python_version = "3.10"
@@ -16,4 +18,4 @@ no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_return_any = false
-exclude = "models/|schemas/"
+exclude = "models/|schemas/|migrations/versions/"

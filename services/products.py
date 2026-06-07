@@ -1,6 +1,8 @@
-from uuid import UUID
 from typing import List
+from uuid import UUID
+
 from sqlalchemy.orm import Session
+
 from repositories.products import ProductRepository
 from schemas.products import SProduct, SProductBase, SProductPatch
 

@@ -1,9 +1,11 @@
-from uuid import UUID
-from fastapi import HTTPException, APIRouter, Depends, status
 from typing import List
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from dependencies import get_order_service
 from schemas.orders import SOrder, SOrderCreate, SOrderItem
 from services.orders import OrderService
-from dependencies import get_order_service
 
 order_router = APIRouter(prefix="/orders")
 

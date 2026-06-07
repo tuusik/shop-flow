@@ -1,9 +1,12 @@
-from repositories.users import UserRepository
-from sqlalchemy.orm import Session
-from uuid import UUID
 from typing import List
-from schemas.users import SUser, SUserPatch, SUserBase
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from repositories.users import UserRepository
 from schemas.orders import SOrder
+from schemas.users import SUser, SUserBase, SUserPatch
+
 
 class UserService:
     def __init__(self, session: Session):

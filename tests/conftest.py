@@ -1,14 +1,17 @@
 import os
+
 os.environ["DATABASE_URL"] = "sqlite:///./test_shopflow.db"
+
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
+
+from database import SessionLocal, engine
+from dependencies import get_session
 from main import app
 from models import Base
-from database import engine, SessionLocal
 from schemas.users import SUser
-from uuid import UUID
-from dependencies import get_session
 
 
 @pytest.fixture(scope="session", autouse=True)

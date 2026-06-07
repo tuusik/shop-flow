@@ -1,8 +1,10 @@
+from uuid import UUID
+
 import pytest
 from pydantic import ValidationError
-from schemas.users import SUser, SUserBase, SUserPatch
+
 from schemas.products import SProduct, SProductBase, SProductPatch
-from uuid import UUID
+from schemas.users import SUser, SUserBase, SUserPatch
 
 
 class TestUserSchema:

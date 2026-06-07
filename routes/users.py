@@ -1,10 +1,12 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, HTTPException
 from uuid import UUID
-from schemas.users import SUser, SUserPatch, SUserBase
-from services.users import UserService
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
 from dependencies import get_user_service
 from schemas.orders import SOrder
+from schemas.users import SUser, SUserBase, SUserPatch
+from services.users import UserService
 
 user_router = APIRouter(prefix="/users")
 
