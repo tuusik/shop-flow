@@ -15,9 +15,9 @@ class TestUsers:
     async def test_get_users_list(self, client, created_user):
         response = await client.get("/users")
         assert response.status_code == 200
-        users = response.json()
-        assert isinstance(users, list)
-        assert any(u["id"] == created_user["id"] for u in users)
+        body = response.json()
+        assert "items" in body
+        assert any(u["id"] == created_user["id"] for u in body["items"])
 
     async def test_get_user_by_id(self, client, created_user):
         response = await client.get(f"/users/{created_user['id']}")
@@ -59,9 +59,9 @@ class TestProducts:
     async def test_get_products_list(self, client, created_product):
         response = await client.get("/products")
         assert response.status_code == 200
-        products = response.json()
-        assert isinstance(products, list)
-        assert any(p["id"] == created_product["id"] for p in products)
+        body = response.json()
+        assert "items" in body
+        assert any(p["id"] == created_product["id"] for p in body["items"])
 
     async def test_get_product_by_id(self, client, created_product):
         response = await client.get(f"/products/{created_product['id']}")

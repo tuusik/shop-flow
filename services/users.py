@@ -1,3 +1,4 @@
+from math import ceil
 from typing import List
 from uuid import UUID
 
@@ -5,6 +6,7 @@ from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.users import UserRepository
+from schemas.base import SPaginated
 from schemas.orders import SOrder
 from schemas.users import SUser, SUserBase, SUserPatch, SUserRegister
 
@@ -17,6 +19,16 @@ class UserService:
 
     async def get_users_list(self) -> List[SUser]:
         return [SUser.model_validate(user) for user in await self.repo.get_users_list()]
+
+    async def get_users_paginated(self, page: int, size: int) -> SPaginated[SUser]:
+        items, total = await self.repo.get_list_paginated(page, size)
+        return SPaginated[SUser](
+            items=[SUser.model_validate(u) for u in items],
+            total=total,
+            page=page,
+            size=size,
+            pages=ceil(total / size) if total else 0,
+        )
 
     async def get_user(self, id: UUID) -> SUser | None:
         user = await self.repo.get(id)

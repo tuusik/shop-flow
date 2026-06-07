@@ -1,9 +1,11 @@
+from math import ceil
 from typing import List
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.products import ProductRepository
+from schemas.base import SPaginated
 from schemas.products import SProduct, SProductBase, SProductPatch
 
 
@@ -13,6 +15,16 @@ class ProductService:
 
     async def get_products_list(self) -> List[SProduct]:
         return [SProduct.model_validate(p) for p in await self.repo.get_products_list()]
+
+    async def get_products_paginated(self, page: int, size: int) -> SPaginated[SProduct]:
+        items, total = await self.repo.get_list_paginated(page, size)
+        return SPaginated[SProduct](
+            items=[SProduct.model_validate(p) for p in items],
+            total=total,
+            page=page,
+            size=size,
+            pages=ceil(total / size) if total else 0,
+        )
 
     async def get_product(self, id: UUID) -> SProduct | None:
         product = await self.repo.get(id)

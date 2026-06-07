@@ -1,9 +1,10 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from dependencies import get_user_service
+from schemas.base import SPaginated
 from schemas.orders import SOrder
 from schemas.users import SUser, SUserBase, SUserPatch
 from services.users import UserService
@@ -20,8 +21,12 @@ async def create_user(user: SUserBase, service: UserService = Depends(get_user_s
 
 
 @user_router.get("", status_code=status.HTTP_200_OK)
-async def get_users(service: UserService = Depends(get_user_service)) -> List[SUser]:
-    return await service.get_users_list()
+async def get_users(
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+    service: UserService = Depends(get_user_service),
+) -> SPaginated[SUser]:
+    return await service.get_users_paginated(page, size)
 
 
 @user_router.get("/{id}", status_code=status.HTTP_200_OK)

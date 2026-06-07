@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from dependencies import get_product_service
+from schemas.base import SPaginated
 from schemas.products import SProduct, SProductBase, SProductPatch
 from services.products import ProductService
 
@@ -11,8 +12,12 @@ product_router = APIRouter(prefix="/products")
 
 
 @product_router.get("", status_code=status.HTTP_200_OK)
-async def get_products(service: ProductService = Depends(get_product_service)) -> List[SProduct]:
-    return await service.get_products_list()
+async def get_products(
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+    service: ProductService = Depends(get_product_service),
+) -> SPaginated[SProduct]:
+    return await service.get_products_paginated(page, size)
 
 
 @product_router.get("/popular", status_code=status.HTTP_200_OK)
