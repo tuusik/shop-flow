@@ -1,6 +1,7 @@
 import os
 
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test_shopflow.db"
+os.environ["SECRET_KEY"] = "test-secret-key"
 
 from uuid import UUID
 
