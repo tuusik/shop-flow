@@ -24,9 +24,10 @@ async def create_user(user: SUserBase, service: UserService = Depends(get_user_s
 async def get_users(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
+    search: str | None = Query(None),
     service: UserService = Depends(get_user_service),
 ) -> SPaginated[SUser]:
-    return await service.get_users_paginated(page, size)
+    return await service.get_users_paginated(page, size, search)
 
 
 @user_router.get("/{id}", status_code=status.HTTP_200_OK)

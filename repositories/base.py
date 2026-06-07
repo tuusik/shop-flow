@@ -1,4 +1,4 @@
-from typing import Generic, List, TypeVar
+from typing import Any, Generic, List, TypeVar
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -19,11 +19,14 @@ class BaseRepository(Generic[T]):
         result = await self.session.scalars(select(self.model))
         return list(result)
 
-    async def get_list_paginated(self, page: int, size: int) -> tuple[List[T], int]:
-        total = await self.session.scalar(select(func.count()).select_from(self.model))
-        result = await self.session.scalars(
-            select(self.model).offset((page - 1) * size).limit(size)
-        )
+    async def get_list_paginated(self, page: int, size: int, *filters: Any) -> tuple[List[T], int]:
+        query = select(self.model)
+        count_q = select(func.count()).select_from(self.model)
+        for f in filters:
+            query = query.where(f)
+            count_q = count_q.where(f)
+        total = await self.session.scalar(count_q)
+        result = await self.session.scalars(query.offset((page - 1) * size).limit(size))
         return list(result), total or 0
 
     async def delete(self, id: UUID) -> bool:

@@ -17,6 +17,21 @@ class ProductRepository(BaseRepository[Product]):
     async def get_products_list(self) -> List[Product]:
         return await self.get_list()
 
+    async def get_products_paginated(
+        self, page: int, size: int,
+        search: str | None = None,
+        min_price: float | None = None,
+        max_price: float | None = None,
+    ) -> tuple[List[Product], int]:
+        filters: list[Any] = []
+        if search:
+            filters.append(Product.title.ilike(f"%{search}%"))
+        if min_price is not None:
+            filters.append(Product.price >= min_price)
+        if max_price is not None:
+            filters.append(Product.price <= max_price)
+        return await self.get_list_paginated(page, size, *filters)
+
     async def create(self, product: SProductBase) -> Product:
         new_product = Product(**product.model_dump())
         new_product.id = uuid4()

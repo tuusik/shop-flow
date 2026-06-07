@@ -15,9 +15,12 @@ product_router = APIRouter(prefix="/products")
 async def get_products(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
+    search: str | None = Query(None),
+    min_price: float | None = Query(None, ge=0),
+    max_price: float | None = Query(None, ge=0),
     service: ProductService = Depends(get_product_service),
 ) -> SPaginated[SProduct]:
-    return await service.get_products_paginated(page, size)
+    return await service.get_products_paginated(page, size, search, min_price, max_price)
 
 
 @product_router.get("/popular", status_code=status.HTTP_200_OK)

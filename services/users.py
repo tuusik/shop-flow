@@ -20,8 +20,8 @@ class UserService:
     async def get_users_list(self) -> List[SUser]:
         return [SUser.model_validate(user) for user in await self.repo.get_users_list()]
 
-    async def get_users_paginated(self, page: int, size: int) -> SPaginated[SUser]:
-        items, total = await self.repo.get_list_paginated(page, size)
+    async def get_users_paginated(self, page: int, size: int, search: str | None = None) -> SPaginated[SUser]:
+        items, total = await self.repo.get_users_paginated(page, size, search)
         return SPaginated[SUser](
             items=[SUser.model_validate(u) for u in items],
             total=total,

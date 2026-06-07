@@ -1,7 +1,7 @@
 from typing import Any, List
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -16,6 +16,15 @@ class UserRepository(BaseRepository[User]):
 
     async def get_users_list(self) -> List[User]:
         return await self.get_list()
+
+    async def get_users_paginated(
+        self, page: int, size: int,
+        search: str | None = None,
+    ) -> tuple[List[User], int]:
+        filters: list[Any] = []
+        if search:
+            filters.append(or_(User.email.ilike(f"%{search}%")))
+        return await self.get_list_paginated(page, size, *filters)
 
     async def get_by_email(self, email: str) -> User | None:
         result = await self.session.scalars(select(User).where(User.email == email))

@@ -16,8 +16,13 @@ class ProductService:
     async def get_products_list(self) -> List[SProduct]:
         return [SProduct.model_validate(p) for p in await self.repo.get_products_list()]
 
-    async def get_products_paginated(self, page: int, size: int) -> SPaginated[SProduct]:
-        items, total = await self.repo.get_list_paginated(page, size)
+    async def get_products_paginated(
+        self, page: int, size: int,
+        search: str | None = None,
+        min_price: float | None = None,
+        max_price: float | None = None,
+    ) -> SPaginated[SProduct]:
+        items, total = await self.repo.get_products_paginated(page, size, search, min_price, max_price)
         return SPaginated[SProduct](
             items=[SProduct.model_validate(p) for p in items],
             total=total,
