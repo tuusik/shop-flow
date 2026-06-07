@@ -2,26 +2,27 @@ from typing import Generic, List, TypeVar
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 T = TypeVar("T")
 
 
 class BaseRepository(Generic[T]):
-    def __init__(self, session: Session, model: type[T]):
+    def __init__(self, session: AsyncSession, model: type[T]):
         self.session = session
         self.model = model
 
-    def get(self, id: UUID) -> T | None:
-        return self.session.get(self.model, id)
+    async def get(self, id: UUID) -> T | None:
+        return await self.session.get(self.model, id)
 
-    def get_list(self) -> List[T]:
-        return list(self.session.scalars(select(self.model)))
+    async def get_list(self) -> List[T]:
+        result = await self.session.scalars(select(self.model))
+        return list(result)
 
-    def delete(self, id: UUID) -> bool:
-        obj = self.get(id)
+    async def delete(self, id: UUID) -> bool:
+        obj = await self.get(id)
         if not obj:
             return False
-        self.session.delete(obj)
-        self.session.commit()
+        await self.session.delete(obj)
+        await self.session.commit()
         return True

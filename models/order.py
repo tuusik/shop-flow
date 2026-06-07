@@ -16,7 +16,9 @@ class Order(Base):
     created_at: Mapped[datetime.date] = mapped_column(Date)
 
     user: Mapped["User"] = relationship("User", back_populates="orders")  # type: ignore[name-defined]
-    items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+    items: Mapped[list["OrderItem"]] = relationship(
+        "OrderItem", back_populates="order", cascade="all, delete-orphan", lazy="selectin"
+    )
 
 class OrderItem(Base):
     __tablename__ = "order_items"

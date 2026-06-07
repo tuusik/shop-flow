@@ -1,7 +1,6 @@
 import os
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from models import Base  # noqa: F401
 
@@ -11,6 +10,6 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
-engine = create_engine(DATABASE_URL, echo=DEBUG)
+engine = create_async_engine(DATABASE_URL, echo=DEBUG)
 
-SessionLocal = sessionmaker(engine, expire_on_commit=False)
+SessionLocal = async_sessionmaker(engine, expire_on_commit=False)

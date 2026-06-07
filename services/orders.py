@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.orders import OrderRepository
 from repositories.products import ProductRepository
@@ -10,28 +10,28 @@ from schemas.orders import SOrder, SOrderCreate, SOrderItem
 
 
 class OrderService:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
         self.repo = OrderRepository(session)
         self.user_repo = UserRepository(session)
         self.product_repo = ProductRepository(session)
 
-    def get_orders_list(self) -> List[SOrder]:
-        return [SOrder.model_validate(o) for o in self.repo.get_orders_list()]
+    async def get_orders_list(self) -> List[SOrder]:
+        return [SOrder.model_validate(o) for o in await self.repo.get_orders_list()]
 
-    def get_order(self, id: UUID) -> SOrder | None:
-        order = self.repo.get(id)
+    async def get_order(self, id: UUID) -> SOrder | None:
+        order = await self.repo.get(id)
         if not order:
             return None
         return SOrder.model_validate(order)
 
-    def create_order(self, data: SOrderCreate) -> SOrder:
-        user = self.user_repo.get(data.user_id)
+    async def create_order(self, data: SOrderCreate) -> SOrder:
+        user = await self.user_repo.get(data.user_id)
         if not user:
             raise ValueError(f"User {data.user_id} not found")
 
         for item in data.items:
-            product = self.product_repo.get(item.product_id)
+            product = await self.product_repo.get(item.product_id)
             if not product:
                 raise ValueError(f"Product {item.product_id} not found")
             if product.stock < item.quantity:
@@ -41,31 +41,26 @@ class OrderService:
                 )
 
         for item in data.items:
-            product = self.product_repo.get(item.product_id)
-            if not product:
-                raise ValueError(f"Product {item.product_id} not found")
-
-        for item in data.items:
-            product = self.product_repo.get(item.product_id)
+            product = await self.product_repo.get(item.product_id)
             assert product is not None
             product.stock -= item.quantity
 
-        return SOrder.model_validate(self.repo.create(data))
+        return SOrder.model_validate(await self.repo.create(data))
 
-    def delete_order(self, id: UUID) -> bool:
-        order = self.repo.get(id)
+    async def delete_order(self, id: UUID) -> bool:
+        order = await self.repo.get(id)
         if not order:
             return False
 
         for item in order.items:
-            product = self.product_repo.get(item.product_id)
+            product = await self.product_repo.get(item.product_id)
             if product:
                 product.stock += item.quantity
 
-        return self.repo.delete(id)
+        return await self.repo.delete(id)
 
-    def get_products_in_order(self, id: UUID) -> List[SOrderItem] | None:
-        items = self.repo.get_products_in_order(id)
+    async def get_products_in_order(self, id: UUID) -> List[SOrderItem] | None:
+        items = await self.repo.get_products_in_order(id)
         if not items:
             return None
         return [SOrderItem.model_validate(i) for i in items]

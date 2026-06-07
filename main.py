@@ -15,5 +15,5 @@ app.include_router(order_router)
 
 
 @app.get("/")
-def root():
+async def root():
     return {"status": "ok"}

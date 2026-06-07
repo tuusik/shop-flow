@@ -2,7 +2,8 @@ from typing import Any, List
 from uuid import UUID, uuid4
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from models.order import Order
 from models.user import User
@@ -11,37 +12,39 @@ from schemas.users import SUserBase
 
 
 class UserRepository(BaseRepository[User]):
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         super().__init__(session, User)
 
-    def get_users_list(self) -> List[User]:
-        return self.get_list()
+    async def get_users_list(self) -> List[User]:
+        return await self.get_list()
 
-    def get_by_email(self, email: str) -> User | None:
-        return self.session.scalars(select(User).where(User.email == email)).first()
+    async def get_by_email(self, email: str) -> User | None:
+        result = await self.session.scalars(select(User).where(User.email == email))
+        return result.first()
 
-    def create(self, user: SUserBase) -> User:
+    async def create(self, user: SUserBase) -> User:
         new_user = User(**user.model_dump())
         new_user.id = uuid4()
         self.session.add(new_user)
-        self.session.commit()
-        self.session.refresh(new_user)
+        await self.session.commit()
+        await self.session.refresh(new_user)
         return new_user
 
-    def update(self, id: UUID, data: dict[str, Any]) -> User | None:
-        user = self.get(id)
+    async def update(self, id: UUID, data: dict[str, Any]) -> User | None:
+        user = await self.get(id)
         if not user:
             return None
         for field, value in data.items():
             setattr(user, field, value)
-        self.session.commit()
-        self.session.refresh(user)
+        await self.session.commit()
+        await self.session.refresh(user)
         return user
 
-    def get_user_orders(self, id: UUID) -> List[Order] | None:
-        user = self.get(id)
+    async def get_user_orders(self, id: UUID) -> List[Order] | None:
+        user = await self.get(id)
         if not user:
             return None
-        return list(self.session.scalars(
+        result = await self.session.scalars(
             select(Order).where(Order.user_id == id).options(selectinload(Order.items))
-        ))
+        )
+        return list(result)

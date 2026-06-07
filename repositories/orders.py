@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID, uuid4
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.order import Order, OrderItem
 from repositories.base import BaseRepository
@@ -10,13 +10,13 @@ from schemas.orders import SOrderCreate
 
 
 class OrderRepository(BaseRepository[Order]):
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         super().__init__(session, Order)
 
-    def get_orders_list(self) -> List[Order]:
-        return self.get_list()
+    async def get_orders_list(self) -> List[Order]:
+        return await self.get_list()
 
-    def create(self, order: SOrderCreate) -> Order:
+    async def create(self, order: SOrderCreate) -> Order:
         new_order = Order(user_id=order.user_id, created_at=order.created_at)
         new_order.id = uuid4()
         for item in order.items:
@@ -24,12 +24,12 @@ class OrderRepository(BaseRepository[Order]):
             order_item.id = uuid4()
             new_order.items.append(order_item)
         self.session.add(new_order)
-        self.session.commit()
-        self.session.refresh(new_order)
+        await self.session.commit()
         return new_order
 
-    def get_products_in_order(self, id: UUID) -> List[OrderItem] | None:
-        order = self.get(id)
+    async def get_products_in_order(self, id: UUID) -> List[OrderItem] | None:
+        order = await self.get(id)
         if not order:
             return None
-        return list(self.session.scalars(select(OrderItem).where(OrderItem.order_id == id)))
+        result = await self.session.scalars(select(OrderItem).where(OrderItem.order_id == id))
+        return list(result)
